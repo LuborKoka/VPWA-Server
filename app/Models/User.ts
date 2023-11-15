@@ -11,7 +11,7 @@ export default class User extends BaseModel {
     public password: string
 
     @column()
-    public nickName: string
+    public username: string
 
     @column()
     public isMuted: boolean

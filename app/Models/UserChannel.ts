@@ -3,7 +3,7 @@ import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import User from './User'
 import Channel from './Channel'
 
-export default class UserChannel extends BaseModel {
+export default class UsersChannel extends BaseModel {
     @column({ isPrimary: true })
     public id: string
 
