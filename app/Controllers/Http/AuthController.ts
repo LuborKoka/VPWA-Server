@@ -3,15 +3,13 @@ import Channel from 'App/Models/Channel'
 import User from 'App/Models/User'
 import UserChannel from 'App/Models/UserChannel'
 import RegisterUserValidator from 'App/Validators/RegisterUserValidator'
-import argon2 from 'phc-argon2'
 
 
 export default class AuthController {
   async register({ request }: HttpContextContract) {
     // if invalid, exception
     const data = await request.validate(RegisterUserValidator)
-    const hash = await argon2.hash_password(data.password)
-    const user = await User.create({...data, password: hash})
+    const user = await User.create({...data})
     // join user to general channel
     //dorobit query, ktora zapise pouzivatela do general kanalu
     const general = await Channel.findByOrFail('name', 'General')
@@ -22,7 +20,7 @@ export default class AuthController {
     //await user.related('channel').attach([general.id])
     const resultUser = {
         id: user.id,
-        channels: [general.id],
+        channels: [{id: general.id, title: general.name, isPublic: false}],
     }
 
     return resultUser
@@ -40,9 +38,23 @@ export default class AuthController {
   }
 
   async me({ auth }: HttpContextContract) {
-    //get channels where the user is member
-    //const channels =
-   // await auth.user!.load('channels')
+    // await auth.user!.load('channels')
+    const result = await UserChannel.query()
+            .select('channels.name', 'channels.isPrivate')
+            .innerJoin('channels', 'channels.id', 'users_channels.channelId')
+            .exec()
+
+
+    const channels = result.map((row) => ({
+        name: row.$extras.channel_name,
+        isPrivate: row.$extras.channel_is_private
+    }))
+
+    //toto musi byt dokoncene, az pojde ten login, asi vratim noveho usera
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    //auth.user!.channels = channels
     return auth.user
   }
 }
+
+
