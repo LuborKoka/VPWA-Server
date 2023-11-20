@@ -3,13 +3,16 @@ import Channel from 'App/Models/Channel'
 import User from 'App/Models/User'
 import UserChannel from 'App/Models/UserChannel'
 import RegisterUserValidator from 'App/Validators/RegisterUserValidator'
+import argon2 from 'phc-argon2'
 
 
 export default class AuthController {
   async register({ request }: HttpContextContract) {
     // if invalid, exception
     const data = await request.validate(RegisterUserValidator)
-    const user = await User.create({...data})
+    //spytat sa tuto na ten hash
+    const hash = await argon2.hash(data.password)
+    const user = await User.create({...data, password: hash})
     // join user to general channel
     //dorobit query, ktora zapise pouzivatela do general kanalu
     const general = await Channel.findByOrFail('name', 'General')
@@ -38,22 +41,33 @@ export default class AuthController {
   }
 
   async me({ auth }: HttpContextContract) {
-    // await auth.user!.load('channels')
-    const result = await UserChannel.query()
-            .select('channels.name', 'channels.isPrivate')
-            .innerJoin('channels', 'channels.id', 'users_channels.channelId')
-            .exec()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const user = auth.user!
 
+    const result = await UserChannel.query()
+        .select('channels.name', 'channels.is_private')
+        .join('channels', 'channels.id', 'users_channels.channel_id')
+        .where('users_channels.user_id', user.id)
+        .orderBy('channels.is_private', 'asc',)
+        .orderBy('channels.name')
+        .exec()
 
     const channels = result.map((row) => ({
-        name: row.$extras.channel_name,
-        isPrivate: row.$extras.channel_is_private
+        name: row.$extras.name,
+        isPrivate: row.$extras.is_private
     }))
 
-    //toto musi byt dokoncene, az pojde ten login, asi vratim noveho usera
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    //auth.user!.channels = channels
-    return auth.user
+
+
+    const res = {
+        username: user.username,
+        id: user.id,
+        status: user.status,
+        isMuted: user.isMuted,
+        email: user.email,
+        channels
+    }
+    return res
   }
 }
 
