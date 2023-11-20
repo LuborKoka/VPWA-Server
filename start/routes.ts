@@ -19,22 +19,14 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route'
-import Ws from '@ioc:Ruby184/Socket.IO/Ws'
 
 Route.get('/', async () => {
   return { hello: 'world' }
 })
 
 Route.group(() => {
-    Route.post('register', 'AuthController.register')
-    Route.post('login', 'AuthController.login')
-    Route.post('logout', 'AuthController.logout').middleware('auth')
-    Route.get('me', 'AuthController.me').middleware('auth')
+  Route.post('register', 'AuthController.register')
+  Route.post('login', 'AuthController.login')
+  Route.post('logout', 'AuthController.logout').middleware('auth')
+  Route.get('me', 'AuthController.me').middleware('auth')
 }).prefix('auth')
-
-
-// this is dynamic namespace, in controller methods we can use params.name
-Ws.namespace('channels/:name')
-  // .middleware('channel') // check if user can join given channel
-  .on('loadMessages', 'MessageController.loadMessages')
-  .on('addMessage', 'MessageController.addMessage')
