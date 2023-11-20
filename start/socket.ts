@@ -8,16 +8,16 @@
 */
 
 import Ws from '@ioc:Ruby184/Socket.IO/Ws'
-
+/*
 Ws.namespace('/')
   .connected('ActivityController.onConnected')
   .disconnected('ActivityController.onDisconnected')
+*/
 
 
-// hadze duplicate event handler
 // this is dynamic namespace, in controller methods we can use params.name
-/*
+
 Ws.namespace('channels/:name')
   // .middleware('channel') // check if user can join given channel
   .on('loadMessages', 'MessageController.loadMessages')
-  .on('addMessage', 'MessageController.addMessage')*/
+  .on('addMessage', 'MessageController.addMessage')
