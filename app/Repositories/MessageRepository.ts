@@ -1,23 +1,41 @@
 import type { MessageRepositoryContract, SerializedMessage } from '@ioc:Repositories/MessageRepository'
 import Channel from 'App/Models/Channel'
+import Message from 'App/Models/Message'
+import User from 'App/Models/User'
 
 export default class MessageRepository implements MessageRepositoryContract {
-  public async getAll(channelName: string): Promise<SerializedMessage[]> {
-    //by malo vratit vsetky spravy z channelu
-    const channel = await Channel.query()
-      .where('name', channelName)
-      .preload('messages', (messagesQuery) => messagesQuery.preload('author'))
-      .firstOrFail()
+    public async getAll(channelName: string): Promise<SerializedMessage[]> {
+        //by malo vratit vsetky spravy z channelu
+        const channel = await Channel.findByOrFail('name', channelName)
+        const messages = await Message.query()
+            .select('messages.content', 'messages.id', 'messages.created_at', 'messages.user_id', 'users.username')
+            .join('users', 'messages.user_id', 'users.id')
+            .where('messages.channel_id', channel.id)
+            .exec()
 
-    return channel.messages.map((message) => message.serialize() as SerializedMessage)
-  }
+        return messages.map( m => ({
+            content: m.content,
+            senderId: m.userId,
+            senderName: m.$extras.username,
+            createdAt: String(m.createdAt),
+            id: m.id
+        }) as SerializedMessage)
+      }
 
   public async create(channelName: string, userId: string, content: string): Promise<SerializedMessage> {
     //vytvori novu spravu pri posielani, ak rozumiem dobre
     const channel = await Channel.findByOrFail('name', channelName)
-    const message = await channel.related('messages').create({ createdBy: userId, content })
-    await message.load('author')
+    const message = await Message.create({content: content, userId: userId, channelId: channel.id})
+    const user = await User.findByOrFail('id', userId)
 
-    return message.serialize() as SerializedMessage
+    const resMessage: SerializedMessage = {
+        senderId: userId,
+        senderName: user.username,
+        content: content,
+        createdAt: String(message.createdAt),
+        id: message.id
+    }
+
+    return resMessage
   }
 }

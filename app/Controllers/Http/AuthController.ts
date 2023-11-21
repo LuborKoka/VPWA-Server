@@ -48,7 +48,7 @@ export default class AuthController {
         .select('channels.name', 'channels.is_private')
         .join('channels', 'channels.id', 'users_channels.channel_id')
         .where('users_channels.user_id', user.id)
-        .orderBy('channels.is_private', 'asc',)
+        .orderBy('channels.is_private', 'desc',)
         .orderBy('channels.name')
         .exec()
 
