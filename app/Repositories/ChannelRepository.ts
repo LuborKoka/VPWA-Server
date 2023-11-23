@@ -41,4 +41,17 @@ export default class ChannelRepository implements ChannelRepositoryContract {
             isMember: true
         }
     }
+
+    public async delete(channelName: string, username: string): Promise<boolean> {
+        const channel = await Channel.findByOrFail('name', channelName)
+        const admin = await UserModel.findByOrFail('username', username)
+
+
+        //chcelo by to vratit 401, ale tak co uz
+        if ( channel.adminId !== admin.id ) return false
+
+        await channel.delete()
+
+        return true
+    }
 }

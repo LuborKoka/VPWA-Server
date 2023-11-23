@@ -19,4 +19,9 @@ export default class ChannelController {
         //treba dorobit broadcast pre vsetkych ak je public channel
         return this.channelRepository.create(decodeURIComponent(params.name), username, isPrivate)
     }
+
+    public async deleteChannel({ params }: WsContextContract, username: string) {
+        // dorobit broadcast pre vsetkych v channeli
+        return this.channelRepository.delete(decodeURIComponent(params.name), username)
+    }
 }
