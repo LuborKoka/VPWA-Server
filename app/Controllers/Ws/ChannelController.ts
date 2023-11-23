@@ -14,4 +14,9 @@ export default class ChannelController {
     public async joinChannel({ params }: WsContextContract, username: string) {
         return this.channelRepository.joinChannel(decodeURIComponent(params.name), username)
     }
+
+    public async createChannel({ params}: WsContextContract, username: string, isPrivate: boolean) {
+        //treba dorobit broadcast pre vsetkych ak je public channel
+        return this.channelRepository.create(decodeURIComponent(params.name), username, isPrivate)
+    }
 }

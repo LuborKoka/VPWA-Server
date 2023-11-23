@@ -1,4 +1,4 @@
-import { ChannelRepositoryContract, User } from "@ioc:Repositories/ChannelRepository";
+import { ChannelRepositoryContract, SerializedChannel, User } from "@ioc:Repositories/ChannelRepository";
 import Channel from "App/Models/Channel";
 import UserModel from "App/Models/User";
 import UsersChannel from "App/Models/UserChannel";
@@ -28,9 +28,17 @@ export default class ChannelRepository implements ChannelRepositoryContract {
         return
     }
 
-    public async create(channelName: string, adminId: string): Promise<void> {
-        //treba dorobit
-        channelName
-        adminId
+    public async create(channelName: string, username: string, isPrivate: boolean): Promise<SerializedChannel> {
+        const admin = await UserModel.findByOrFail('username', username)
+        const channel = await Channel.create({ adminId: admin.id, name: channelName, isPrivate: isPrivate})
+
+        await UsersChannel.create({userId: admin.id, channelId: channel.id})
+
+        return {
+            id: channel.id,
+            name: channel.name,
+            isPrivate: channel.isPrivate,
+            isMember: true
+        }
     }
 }

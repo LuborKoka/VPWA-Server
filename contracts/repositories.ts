@@ -21,20 +21,22 @@ declare module '@ioc:Repositories/MessageRepository' {
 
 
 declare module '@ioc:Repositories/ChannelRepository' {
-    export interface Channel {
+    export interface SerializedChannel {
         id: string,
-        name: string
+        name: string,
+        isPrivate: boolean,
+        isMember: true
     }
 
     export interface User {
-            username: string,
-            status: string,
+        username: string,
+        status: string,
     }
 
     export interface ChannelRepositoryContract {
         getAllMembers(channelName: string): Promise<User[]>
         joinChannel(channelName: string, username: string): Promise<void>
-        create(channelName: string, adminId: string): Promise<void>
+        create(channelName: string, username: string, isPrivate: boolean): Promise<SerializedChannel>
     }
 
     const ChannelRepository: ChannelRepositoryContract

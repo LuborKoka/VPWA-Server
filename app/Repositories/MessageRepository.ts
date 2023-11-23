@@ -5,7 +5,7 @@ import User from 'App/Models/User'
 
 export default class MessageRepository implements MessageRepositoryContract {
     public async getAll(channelName: string): Promise<SerializedMessage[]> {
-        //by malo vratit vsetky spravy z channelu
+        //treba pridat check, ci je user clenom kanalu
         const channel = await Channel.findByOrFail('name', channelName)
         const messages = await Message.query()
             .select('messages.content', 'messages.id', 'messages.created_at', 'messages.user_id', 'users.username')
@@ -23,7 +23,7 @@ export default class MessageRepository implements MessageRepositoryContract {
       }
 
   public async create(channelName: string, userId: string, content: string): Promise<SerializedMessage> {
-    //vytvori novu spravu pri posielani, ak rozumiem dobre
+    //treba pridat check, ci je user clenom kanalu
     const channel = await Channel.findByOrFail('name', channelName)
     const message = await Message.create({content: content, userId: userId, channelId: channel.id})
     const user = await User.findByOrFail('id', userId)
