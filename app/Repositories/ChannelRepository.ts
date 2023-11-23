@@ -1,5 +1,7 @@
 import { ChannelRepositoryContract, User } from "@ioc:Repositories/ChannelRepository";
 import Channel from "App/Models/Channel";
+import UserModel from "App/Models/User";
+import UsersChannel from "App/Models/UserChannel";
 
 
 export default class ChannelRepository implements ChannelRepositoryContract {
@@ -16,6 +18,14 @@ export default class ChannelRepository implements ChannelRepositoryContract {
         }))
 
         return users
+    }
+
+    public async joinChannel(channelName: string, username: string): Promise<void> {
+        const user = await UserModel.findByOrFail('username', username)
+        const channel = await Channel.findByOrFail('name', channelName)
+        await UsersChannel.create({ userId: user.id, channelId: channel.id})
+
+        return
     }
 
     public async create(channelName: string, adminId: string): Promise<void> {

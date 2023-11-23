@@ -13,12 +13,12 @@ export default class MessageController {
   constructor (private messageRepository: MessageRepositoryContract) {}
 
   public async loadMessages({ params }: WsContextContract) {
-    return this.messageRepository.getAll(params.name)
+    return this.messageRepository.getAll(decodeURIComponent(params.name))
   }
 
   public async addMessage({ params, socket, auth }: WsContextContract, content: string) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const message = await this.messageRepository.create(params.name, auth.user!.id, content)
+    const message = await this.messageRepository.create(decodeURIComponent(params.name), auth.user!.id, content)
     // broadcast message to other users in channel
     socket.broadcast.emit('message', message)
     // return message to sender

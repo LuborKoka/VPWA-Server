@@ -8,6 +8,10 @@ export default class ChannelController {
     constructor (private channelRepository: ChannelRepositoryContract) {}
 
     public async getMembers({ params }: WsContextContract) {
-        return this.channelRepository.getAllMembers(params.name)
+        return this.channelRepository.getAllMembers(decodeURIComponent(params.name))
+    }
+
+    public async joinChannel({ params }: WsContextContract, username: string) {
+        return this.channelRepository.joinChannel(decodeURIComponent(params.name), username)
     }
 }

@@ -33,6 +33,7 @@ declare module '@ioc:Repositories/ChannelRepository' {
 
     export interface ChannelRepositoryContract {
         getAllMembers(channelName: string): Promise<User[]>
+        joinChannel(channelName: string, username: string): Promise<void>
         create(channelName: string, adminId: string): Promise<void>
     }
 

@@ -44,6 +44,7 @@ export default class AuthController {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const user = auth.user!
 
+    //treba potom dokoncit este kanaly, kde ma user banan
     const result = await UserChannel.query()
         .distinctOn('channel_id')
         .select('channels.name', 'channels.is_private', 'users_channels.user_id')
@@ -54,7 +55,7 @@ export default class AuthController {
         .exec()
 
     const channels = result.map((row) => ({
-        name: row.$extras.name,
+        name: encodeURIComponent(row.$extras.name),
         isPrivate: row.$extras.is_private,
         isMember: row.userId !== null
     }))

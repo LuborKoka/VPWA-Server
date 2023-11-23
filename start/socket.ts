@@ -21,4 +21,5 @@ Ws.namespace('channels/:name')
   // .middleware('channel') // check if user can join given channel
   .on('loadMessages', 'MessageController.loadMessages')
   .on('addMessage', 'MessageController.addMessage')
-  .on('getMembers', 'ChannelController.getMembers')
+  .on('loadMembers', 'ChannelController.getMembers')
+  .on('joinChannel', 'ChannelController.joinChannel')
