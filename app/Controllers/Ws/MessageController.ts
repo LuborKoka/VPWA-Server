@@ -24,4 +24,14 @@ export default class MessageController {
     // return message to sender
     return message
   }
+
+  public unsentMessage({ socket, auth }: WsContextContract, content: string) {
+    const message = {
+        sender: auth.user?.username,
+        content: content
+    }
+
+    socket.broadcast.emit('unsentMessage', message)
+    return message
+  }
 }
