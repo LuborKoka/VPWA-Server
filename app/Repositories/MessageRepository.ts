@@ -2,6 +2,7 @@ import type { MessageRepositoryContract, SerializedMessage } from '@ioc:Reposito
 import Channel from 'App/Models/Channel'
 import Message from 'App/Models/Message'
 import User from 'App/Models/User'
+import UsersChannel from 'App/Models/UserChannel'
 
 export default class MessageRepository implements MessageRepositoryContract {
     public async getAll(channelName: string): Promise<SerializedMessage[]> {
@@ -25,6 +26,13 @@ export default class MessageRepository implements MessageRepositoryContract {
   public async create(channelName: string, userId: string, content: string): Promise<SerializedMessage> {
     //treba pridat check, ci je user clenom kanalu
     const channel = await Channel.findByOrFail('name', channelName)
+    //toto jest then check.
+    await UsersChannel.query()
+        .where('user_id', userId)
+        .where('channel_id', channel.id)
+        .firstOrFail()
+
+
     const message = await Message.create({content: content, userId: userId, channelId: channel.id})
     const user = await User.findByOrFail('id', userId)
 

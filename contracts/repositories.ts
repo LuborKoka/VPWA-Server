@@ -38,6 +38,9 @@ declare module '@ioc:Repositories/ChannelRepository' {
         joinChannel(channelName: string, username: string): Promise<void>
         create(channelName: string, username: string, isPrivate: boolean): Promise<SerializedChannel>,
         delete(channelName: string, username: string): Promise<boolean>
+        quit(channelName: string, username: string): Promise<unknown>
+        inviteToChannel(channelName: string, username: string, targetName: string): Promise<boolean>
+        revokeFromChannel(channelName: string, username: string, targetName: string): Promise<boolean>
     }
 
     const ChannelRepository: ChannelRepositoryContract

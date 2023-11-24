@@ -24,4 +24,17 @@ export default class ChannelController {
         // dorobit broadcast pre vsetkych v channeli
         return this.channelRepository.delete(decodeURIComponent(params.name), username)
     }
+
+    public async quitChannel({ params }: WsContextContract, username: string ) {
+        return this.channelRepository.quit(decodeURIComponent(params.name), username)
+    }
+
+    public async inviteToChannel({ params }: WsContextContract, username: string, targetName: string) {
+        //poslat dotycnemu ten invite na klienta
+        return this.channelRepository.inviteToChannel(decodeURIComponent(params.name), username, targetName)
+    }
+
+    public async revokeFromChannel({ params }: WsContextContract, username: string, targetName: string) {
+        return this.channelRepository.revokeFromChannel(decodeURIComponent(params.name), username, targetName)
+    }
 }

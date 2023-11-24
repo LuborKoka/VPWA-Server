@@ -1,5 +1,6 @@
 import { ChannelRepositoryContract, SerializedChannel, User } from "@ioc:Repositories/ChannelRepository";
 import Channel from "App/Models/Channel";
+import Invitation from "App/Models/Invitation";
 import UserModel from "App/Models/User";
 import UsersChannel from "App/Models/UserChannel";
 
@@ -53,5 +54,68 @@ export default class ChannelRepository implements ChannelRepositoryContract {
         await channel.delete()
 
         return true
+    }
+
+    public async quit(channelName: string, username: string): Promise<unknown> {
+        /**
+         * @returns true if channel was deleted, else false
+         */
+
+        const user = await UserModel.findByOrFail('username', username)
+        const channel = await Channel.findByOrFail('name', channelName)
+
+        // if user is admin as well, delete the channel
+        if ( user.id === channel.adminId ) {
+            await channel.delete()
+            return true
+        }
+
+
+        const userChannel = await UsersChannel.query()
+            .where('user_id', user.id)
+            .where('channel_id', channel.id)
+            .firstOrFail()
+
+        await userChannel.delete()
+
+        return false
+    }
+
+
+    public async inviteToChannel(channelName: string, username: string, targetName: string): Promise<boolean> {
+        const admin = await UserModel.findByOrFail('username', username)
+        const channel = await Channel.findByOrFail('name', channelName)
+
+        const isInvitationAllowed = channel.adminId === admin.id || !channel.isPrivate
+
+        if ( isInvitationAllowed ) {
+            const invitedUser = await UserModel.findByOrFail('username', targetName)
+            await Invitation.create({channelId: channel.id, userId: invitedUser.id})
+            return true
+        }
+
+        return false
+    }
+
+    public async revokeFromChannel(channelName: string, username: string, targetName: string): Promise<boolean> {
+        //cant revoke yourself, use quit or cancel
+        if ( username === targetName ) return false
+
+        const channel = await Channel.findByOrFail('name', channelName)
+        const owner = await UserModel.findByOrFail('username', username)
+
+        if ( !channel.isPrivate ) return false
+        if ( channel.adminId !== owner.id ) return false
+
+        const target = await UserModel.findByOrFail('username', targetName)
+
+        const targetToDelete = await UsersChannel.query()
+            .where('user_id', target.id)
+            .andWhere('channel_id', channel.id)
+            .firstOrFail()
+
+        await targetToDelete.delete()
+        return true
+
     }
 }

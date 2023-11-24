@@ -57,7 +57,7 @@ export default class AuthController {
     const channels = result.map((row) => ({
         name: encodeURIComponent(row.$extras.name),
         isPrivate: row.$extras.is_private,
-        isMember: row.userId !== null
+        isMember: row.userId === user.id
     }))
 
 
