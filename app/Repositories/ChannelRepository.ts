@@ -1,6 +1,6 @@
 import { ChannelRepositoryContract, SerializedChannel, User } from "@ioc:Repositories/ChannelRepository";
 import Channel from "App/Models/Channel";
-import Invitation from "App/Models/Invitation";
+import InvitationModel from "App/Models/Invitation";
 import UserModel from "App/Models/User";
 import UsersChannel from "App/Models/UserChannel";
 
@@ -90,7 +90,7 @@ export default class ChannelRepository implements ChannelRepositoryContract {
 
         if ( isInvitationAllowed ) {
             const invitedUser = await UserModel.findByOrFail('username', targetName)
-            await Invitation.create({channelId: channel.id, userId: invitedUser.id})
+            await InvitationModel.create({channelId: channel.id, userId: invitedUser.id})
             return true
         }
 

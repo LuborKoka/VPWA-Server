@@ -1,9 +1,16 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Channel from 'App/Models/Channel'
+import Invitation from 'App/Models/Invitation'
 import User from 'App/Models/User'
 import UserChannel from 'App/Models/UserChannel'
 import RegisterUserValidator from 'App/Validators/RegisterUserValidator'
 import argon2 from 'phc-argon2'
+
+type TInvitation = {
+    id: string,
+    channelName: string,
+    createdAt: string
+}
 
 
 export default class AuthController {
@@ -54,10 +61,23 @@ export default class AuthController {
         .orderBy('users_channels.channel_id')
         .exec()
 
-    const channels = result.map((row) => ({
+    const invitationsResult = await Invitation.query()
+        .join('channels', 'channel_id', 'channels.id')
+        .where('user_id', user.id)
+        .exec()
+
+    const channels = result.filter(r => !invitationsResult.some(i => i.$extras.name === r.$extras.name)).map((row) => ({
         name: encodeURIComponent(row.$extras.name),
         isPrivate: row.$extras.is_private,
         isMember: row.userId === user.id
+    }))
+
+
+    const invitations: TInvitation[] = invitationsResult.map(i => ({
+        id: i.id,
+        channelName: i.$extras.name,
+        createdAt: String(i.createdAt),
+        isPrivate: i.$extras.is_private
     }))
 
 
@@ -68,7 +88,8 @@ export default class AuthController {
         status: user.status,
         isMuted: user.isMuted,
         email: user.email,
-        channels
+        channels,
+        invitations
     }
     return res
   }
