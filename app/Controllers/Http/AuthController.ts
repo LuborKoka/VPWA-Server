@@ -62,8 +62,9 @@ export default class AuthController {
         .exec()
 
     const invitationsResult = await Invitation.query()
-        .join('channels', 'channel_id', 'channels.id')
-        .where('user_id', user.id)
+        .select('invitations.id', 'invitations.created_at', 'channels.name', 'channels.is_private')
+        .join('channels', 'invitations.channel_id', 'channels.id')
+        .where('invitations.user_id', user.id)
         .exec()
 
     const channels = result.filter(r => !invitationsResult.some(i => i.$extras.name === r.$extras.name)).map((row) => ({
@@ -79,7 +80,6 @@ export default class AuthController {
         createdAt: String(i.createdAt),
         isPrivate: i.$extras.is_private
     }))
-
 
 
     const res = {

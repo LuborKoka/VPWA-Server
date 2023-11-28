@@ -41,6 +41,7 @@ declare module '@ioc:Repositories/ChannelRepository' {
         quit(channelName: string, username: string): Promise<unknown>
         inviteToChannel(channelName: string, username: string, targetName: string): Promise<boolean>
         revokeFromChannel(channelName: string, username: string, targetName: string): Promise<boolean>
+        handleInvite(channelName: string, userId: string, accepted: boolean, inviteId: string): Promise<SerializedChannel|true>
     }
 
     const ChannelRepository: ChannelRepositoryContract

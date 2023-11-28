@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { inject } from "@adonisjs/core/build/standalone";
 import { ChannelRepositoryContract } from "@ioc:Repositories/ChannelRepository";
 import { WsContextContract } from "@ioc:Ruby184/Socket.IO/WsContext";
@@ -36,5 +37,9 @@ export default class ChannelController {
 
     public async revokeFromChannel({ params }: WsContextContract, username: string, targetName: string) {
         return this.channelRepository.revokeFromChannel(decodeURIComponent(params.name), username, targetName)
+    }
+
+    public async handleInvite({ params, auth }: WsContextContract, inviteId: string, accepted: boolean) {
+        return this.channelRepository.handleInvite(decodeURIComponent(params.name), auth.user!.id, accepted, inviteId)
     }
 }

@@ -5,6 +5,7 @@ import UserModel from "App/Models/User";
 import UsersChannel from "App/Models/UserChannel";
 
 
+
 export default class ChannelRepository implements ChannelRepositoryContract {
     public async getAllMembers(name: string) {
         const result = await Channel.query()
@@ -117,5 +118,25 @@ export default class ChannelRepository implements ChannelRepositoryContract {
         await targetToDelete.delete()
         return true
 
+    }
+
+    public async handleInvite(channelName: string, userId: string, accepted: boolean, inviteId: string) {
+        const invite = await InvitationModel.findByOrFail('id', inviteId)
+        if ( accepted ) {
+            const channel = await Channel.findByOrFail('name', channelName)
+            await UsersChannel.create({ userId: userId, channelId: channel.id})
+            const res: SerializedChannel = {
+                id: channel.id,
+                name: channel.name,
+                isPrivate: channel.isPrivate,
+                isMember: true
+            }
+            await invite.delete()
+            console.log(res)
+            return res
+        }
+
+        await invite.delete()
+        return true
     }
 }
