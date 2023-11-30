@@ -3,7 +3,7 @@ import Channel from 'App/Models/Channel'
 import Invitation from 'App/Models/Invitation'
 import User from 'App/Models/User'
 import UserChannel from 'App/Models/UserChannel'
-import UserStatus from 'App/Models/UserStatus'
+
 import RegisterUserValidator from 'App/Validators/RegisterUserValidator'
 import argon2 from 'phc-argon2'
 
@@ -26,7 +26,7 @@ export default class AuthController {
     const general = await Channel.findByOrFail('name', 'General')
     //vyriesene
     await UserChannel.create({userId: user.id, channelId: general.id})
-    await UserStatus.create({Id: user.id, status: user.status})
+    
     //toto budeme musiet riesit inym sposobom, jest to novy riadok do users_channels, ale jebat lucid orm fakt
     //await user.related('channel').attach([general.id])
     const resultUser = {
@@ -53,17 +53,6 @@ export default class AuthController {
     const user = auth.user!
 
     //treba potom dokoncit este kanaly, kde ma user banan
-
-
-    
-
-    const status = await User.query()
-    .select('users.id','users.email','users.username','users.is_muted','users.status', 'count(*) as message_count'
-    )
-    .innerJoin('users', 'users.id', 'messages.user_id')
-    .where('messages.user_id', user.id)
-    .groupBy('users.id')
-    .exec()
 
 
     const result = await UserChannel.query()
@@ -108,6 +97,7 @@ export default class AuthController {
     return res
   }
 
+  /*
   async menome({ auth }: HttpContextContract) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const user = auth.user!
@@ -117,7 +107,7 @@ export default class AuthController {
     return res
   }
 
-
+*/
 }
 
 
