@@ -107,6 +107,17 @@ export default class AuthController {
     }
     return res
   }
+
+  async menome({ auth }: HttpContextContract) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const user = auth.user!
+    const res = {
+      username: user.username,   
+  }
+    return res
+  }
+
+
 }
 
 
