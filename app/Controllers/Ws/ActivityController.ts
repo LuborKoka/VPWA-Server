@@ -1,5 +1,8 @@
-import type { WsContextContract } from '@ioc:Ruby184/Socket.IO/WsContext'
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import type { WsContextContract, WsSocket } from '@ioc:Ruby184/Socket.IO/WsContext'
 import User from 'App/Models/User'
+
+export const onlineUsersMap = new Map<string, WsSocket>()
 
 export default class ActivityController {
   private getUserRoom(user: User): string {
@@ -11,6 +14,10 @@ export default class ActivityController {
     const room = this.getUserRoom(auth.user!)
     const userSockets = await socket.in(room).allSockets()
 
+    const user = await User.findByOrFail('username', auth.user!.username)
+    user.status = 'online'
+    user.save()
+
     // this is first connection for given user
     if (userSockets.size === 0) {
       socket.broadcast.emit('user:online', auth.user)
@@ -21,6 +28,10 @@ export default class ActivityController {
     // add userId to data shared between Socket.IO servers
     // https://socket.io/docs/v4/server-api/#namespacefetchsockets
     socket.data.userId = auth.user!.id
+    socket.data.username = auth.user!.username
+
+    onlineUsersMap.set(auth.user!.username, socket)
+
 
     const allSockets = await socket.nsp.except(room).fetchSockets()
     const onlineIds = new Set<number>()
@@ -29,9 +40,11 @@ export default class ActivityController {
       onlineIds.add(remoteSocket.data.userId)
     }
 
+
     const onlineUsers = await User.findMany([...onlineIds])
 
     socket.emit('user:list', onlineUsers)
+
 
     logger.info('new websocket connection')
   }
@@ -40,6 +53,10 @@ export default class ActivityController {
   public async onDisconnected({ socket, auth, logger }: WsContextContract, reason: string) {
     const room = this.getUserRoom(auth.user!)
     const userSockets = await socket.in(room).allSockets()
+
+    const user = await User.findByOrFail('username', auth.user!.username)
+    user.status = 'offline'
+    user.save()
 
     // user is disconnected
     if (userSockets.size === 0) {

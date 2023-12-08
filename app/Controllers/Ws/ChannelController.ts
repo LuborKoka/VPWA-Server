@@ -8,30 +8,27 @@ import { WsContextContract } from "@ioc:Ruby184/Socket.IO/WsContext";
 export default class ChannelController {
     constructor (private channelRepository: ChannelRepositoryContract) {}
 
-    public async getMembers({ params }: WsContextContract) {
-        return this.channelRepository.getAllMembers(decodeURIComponent(params.name))
+    public async getMembers({ params, auth }: WsContextContract) {
+        return this.channelRepository.getAllMembers(decodeURIComponent(params.name), auth.user!.username)
     }
 
-    public async joinChannel({ params }: WsContextContract, username: string) {
-        return this.channelRepository.joinChannel(decodeURIComponent(params.name), username)
+    public async joinChannel({ params, auth }: WsContextContract, isPrivate: boolean) {
+        return this.channelRepository.joinChannel(decodeURIComponent(params.name), auth.user!.username, isPrivate)
     }
 
-    public async createChannel({ params}: WsContextContract, username: string, isPrivate: boolean) {
-        //treba dorobit broadcast pre vsetkych ak je public channel
-        return this.channelRepository.create(decodeURIComponent(params.name), username, isPrivate)
+    public async createChannel({ params, auth }: WsContextContract, isPrivate: boolean) {
+        return this.channelRepository.create(decodeURIComponent(params.name), auth.user!.username, isPrivate)
     }
 
     public async deleteChannel({ params }: WsContextContract, username: string) {
-        // dorobit broadcast pre vsetkych v channeli
         return this.channelRepository.delete(decodeURIComponent(params.name), username)
     }
 
-    public async quitChannel({ params }: WsContextContract, username: string ) {
-        return this.channelRepository.quit(decodeURIComponent(params.name), username)
+    public async quitChannel({ params, auth }: WsContextContract) {
+        return this.channelRepository.quit(decodeURIComponent(params.name), auth.user!.username)
     }
 
     public async inviteToChannel({ params }: WsContextContract, username: string, targetName: string) {
-        //poslat dotycnemu ten invite na klienta
         return this.channelRepository.inviteToChannel(decodeURIComponent(params.name), username, targetName)
     }
 

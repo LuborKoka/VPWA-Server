@@ -1,5 +1,6 @@
 // here we are declaring our MessageRepository types for Repositories/MessageRepository
 
+
 // container binding. See providers/AppProvider.ts for how we are binding the implementation
 declare module '@ioc:Repositories/MessageRepository' {
     export interface SerializedMessage {
@@ -11,8 +12,8 @@ declare module '@ioc:Repositories/MessageRepository' {
     }
 
     export interface MessageRepositoryContract {
-      getAll(channelName: string): Promise<SerializedMessage[]>
-      create(channelName: string, userId: string, content: string): Promise<SerializedMessage>
+      getAll(channelName: string, userId: string): Promise<SerializedMessage[]>
+      create(channelName: string, userId: string, content: string): Promise<SerializedMessage | string>
     }
 
     const MessageRepository: MessageRepositoryContract
@@ -25,7 +26,7 @@ declare module '@ioc:Repositories/ChannelRepository' {
         id: string,
         name: string,
         isPrivate: boolean,
-        isMember: true
+        isMember: boolean
     }
 
     export interface User {
@@ -34,14 +35,14 @@ declare module '@ioc:Repositories/ChannelRepository' {
     }
 
     export interface ChannelRepositoryContract {
-        getAllMembers(channelName: string): Promise<User[]>
-        joinChannel(channelName: string, username: string): Promise<void>
+        getAllMembers(channelName: string, username: string): Promise<User[] | string>
+        joinChannel(channelName: string, username: string, isPrivate: boolean): Promise<SerializedChannel>
         create(channelName: string, username: string, isPrivate: boolean): Promise<SerializedChannel>,
-        delete(channelName: string, username: string): Promise<boolean>
-        quit(channelName: string, username: string): Promise<unknown>
-        inviteToChannel(channelName: string, username: string, targetName: string): Promise<boolean>
-        revokeFromChannel(channelName: string, username: string, targetName: string): Promise<boolean>
-        handleInvite(channelName: string, userId: string, accepted: boolean, inviteId: string): Promise<SerializedChannel|true>
+        delete(channelName: string, username: string): Promise<boolean | string>
+        quit(channelName: string, username: string): Promise<SerializedChannel | string>
+        inviteToChannel(channelName: string, username: string, targetName: string): Promise<boolean | string>
+        revokeFromChannel(channelName: string, username: string, targetName: string): Promise<boolean | string>
+        handleInvite(channelName: string, userId: string, accepted: boolean, inviteId: string): Promise<SerializedChannel>
     }
 
     const ChannelRepository: ChannelRepositoryContract
