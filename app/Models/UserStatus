@@ -1,0 +1,24 @@
+// app/Models/UserStatus.ts
+
+import { BaseModel, column, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
+import Message from './Message'
+
+export default class UserStatus extends BaseModel {
+  @column({ isPrimary: true })
+  public id: number
+
+  @column()
+  public email: string
+
+  @column()
+  public username: string
+
+  @column()
+  public is_muted: boolean
+
+  @column()
+  public status: string
+
+  @hasMany(() => Message)
+  public messages: HasMany<typeof Message>
+}
