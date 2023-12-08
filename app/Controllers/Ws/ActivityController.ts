@@ -14,12 +14,11 @@ export default class ActivityController {
         const room = this.getUserRoom(auth.user!)
         const userSockets = await socket.in(room).allSockets()
 
-        auth.user!.status = 'online'
-        auth.user!.save()
+        const status = auth.user!.status
 
         // this is first connection for given user
         if (userSockets.size === 0) {
-            socket.broadcast.emit('user:online', auth.user)
+            socket.broadcast.emit(`user:${status}`, auth.user)
         }
 
         // add this socket to user room
@@ -53,9 +52,6 @@ export default class ActivityController {
         const room = this.getUserRoom(auth.user!)
         const userSockets = await socket.in(room).allSockets()
 
-        auth.user!.status = 'offline'
-        auth.user!.save()
-
         // user is disconnected
         if (userSockets.size === 0) {
         // notify other users
@@ -65,10 +61,12 @@ export default class ActivityController {
         logger.info('websocket disconnected', reason)
     }
 
-    public statusChange({ socket, auth }: WsContextContract, status: string) {
+    public async statusChange({ socket, auth }: WsContextContract, status: string) {
         auth.user!.status = status
-        auth.user!.save()
+        await auth.user!.save()
 
         socket.broadcast.emit(`user:${status}`, auth.user)
+
+        return true
     }
 }
