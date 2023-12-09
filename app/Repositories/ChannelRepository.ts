@@ -21,7 +21,7 @@ export default class ChannelRepository implements ChannelRepositoryContract {
 
         const users: User[] = await result.map(r => ({
             username: r.$extras.username,
-            status: r.$extras.status
+            status: onlineUsersMap.get(r.$extras.username) === undefined ? 'offline' : r.$extras.status
         }))
 
         return users
@@ -33,7 +33,17 @@ export default class ChannelRepository implements ChannelRepositoryContract {
         if ( channel === null ) {
             return this.create(channelName, username, isPrivate)
         }
-        await UsersChannel.create({ userId: user.id, channelId: channel.id})
+        if ( channel.isPrivate )
+            return 'You need an invitation to join a private channel.'
+
+        try {
+            await UsersChannel.create({ userId: user.id, channelId: channel.id})
+        } catch (e) {
+            if ( e?.constraint === 'unique_user_channel' )
+                return 'You are a member of this channel already.'
+
+            return 'Something went south like Sherman'
+        }
 
         return {
             id: channel.id,
@@ -43,9 +53,17 @@ export default class ChannelRepository implements ChannelRepositoryContract {
         }
     }
 
-    public async create(channelName: string, username: string, isPrivate: boolean ): Promise<SerializedChannel> {
+    public async create(channelName: string, username: string, isPrivate: boolean ) {
         const admin = await UserModel.findByOrFail('username', username)
-        const channel = await Channel.create({ adminId: admin.id, name: channelName, isPrivate: isPrivate})
+        let channel: Channel
+
+        try {
+            channel = await Channel.create({ adminId: admin.id, name: channelName, isPrivate: isPrivate})
+        } catch (e) {
+            if ( e?.constraint === 'channels_name_key' )
+                return 'A channel with that name already exists.'
+            return 'Something went south like Sherman.'
+        }
 
         await UsersChannel.create({userId: admin.id, channelId: channel.id})
 
@@ -141,7 +159,21 @@ export default class ChannelRepository implements ChannelRepositoryContract {
 
 
         const invitedUser = await UserModel.findByOrFail('username', targetName)
-        const newInv = await InvitationModel.create({channelId: channel.id, userId: invitedUser.id})
+
+        if ( await isUserMemberOfChannel(invitedUser.id, channel.id) === true )
+            return 'Failed to invite. The user is already a member of this channel.'
+
+        let newInv: InvitationModel
+
+        try {
+            newInv = await InvitationModel.create({channelId: channel.id, userId: invitedUser.id})
+
+        } catch (e) {
+            if ( e?.constraint === 'unique_user_channel_invitation' )
+                return 'An invitation for this user exists.'
+
+            return 'Something went south like Sherman.'
+        }
 
         const inv = {
             id: newInv.id,
@@ -167,7 +199,7 @@ export default class ChannelRepository implements ChannelRepositoryContract {
         if ( await isUserMemberOfChannel(user.id, channel.id) === false ) return 'Failed to revoke. You are not a member of this channel.'
 
         //cant revoke yourself, use quit or cancel
-        if ( username === targetName ) return 'You can\'t revoke yourself.'
+        if ( username === targetName ) return 'You can\'t revoke yourself. Use /cancel command.'
 
         if ( !channel.isPrivate ) return false
         if ( channel.adminId !== user.id ) return false
