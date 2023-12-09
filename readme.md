@@ -134,6 +134,14 @@ CREATE TABLE messages (
     channel_id uuid NOT NULL REFERENCES channels(id) ON DELETE CASCADE
 );
 
+CREATE TABLE invitations (
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    created_at timestamptz NOT NULL DEFAULT NOW(),
+    channel_id uuid NOT NULL REFERENCES channels(id) ON DELETE CASCADE,
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT unique_user_channel_invitation UNIQUE(channel_id, user_id)
+);
+
 CREATE TABLE pings (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
