@@ -1,4 +1,7 @@
-Pouzivam POSTGRESQL databazu.
+Pouzivam **POSTGRESQL** databazu.  
+
+Keby nahodou migracie neposluchali, v `db_backup` je [sql dump datatabazy](./db_backup/vpwa_backup) alebo [backup vytvoreny cez pg admina](./db_backup/VPWA_backup.tar)  
+
 
 **PRED VYTVORENIM MODELOV:**
 

@@ -10,7 +10,6 @@ export default class extends BaseSchema {
             table.uuid('voter_id').notNullable().references('users.id').onDelete('NO ACTION')
             table.uuid('channel_id').notNullable().references('channels.id').onDelete('CASCADE')
             table.uuid('target_user_id').notNullable().references('users.id').onDelete('CASCADE')
-            table.timestamps(true, true)
         })
     }
 

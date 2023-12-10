@@ -10,7 +10,6 @@ export default class extends BaseSchema {
             table.boolean('is_private').defaultTo(false)
             table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(this.now())
             table.uuid('admin_id').notNullable().references('users.id').onDelete('CASCADE')
-            table.timestamps(true, true)
         })
     }
 

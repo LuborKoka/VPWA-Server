@@ -11,7 +11,6 @@ export default class extends BaseSchema {
             table.string('username', 32).notNullable().unique()
             table.boolean('is_muted').defaultTo(false)
             table.string('status', 7).notNullable().defaultTo('online')
-            table.timestamps(true, true)
         })
     }
 
